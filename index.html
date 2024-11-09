@@ -141,6 +141,22 @@ h1 {
 .board.hidden {
   display: none;
 }
+
+.footer {
+  margin-top: 40px;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: var(--secondary-color);
+}
 </style></head><body>
 <h1>Jogo da Velha</h1>
 <div class="game-mode">
@@ -162,6 +178,10 @@ h1 {
 <div class="controls">
   <button class="restart" id="restartButton">Recomeçar Jogo</button>
   <button class="theme-toggle" id="themeToggle">Alternar Tema</button>
+</div>
+<div class="footer">
+  <p>Jogo criado por Pedro Enrique</p>
+  <p><a href="https://jogosdeinclusao.github.io/">Acesse Jogos de Inclusão</a></p>
 </div>
 
 <script>
@@ -234,9 +254,9 @@ function startGame() {
 function handleClick(e) {
   const cell = e.target;
   if (cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS)) return;
-  
+
   placeMark(cell, xTurn ? X_CLASS : O_CLASS);
-  
+
   if (checkWin(xTurn ? X_CLASS : O_CLASS)) {
     endGame(false);
   } else if (isDraw()) {
@@ -244,7 +264,7 @@ function handleClick(e) {
   } else {
     swapTurns();
     setStatusMessage();
-    
+
     if (gameMode === 'ai' && !xTurn) {
       setTimeout(makeAiMove, 500);
     }
@@ -255,10 +275,60 @@ function makeAiMove() {
   const emptyCells = [...cellElements].filter(cell => 
     !cell.classList.contains(X_CLASS) && !cell.classList.contains(O_CLASS)
   );
-  
+
   if (emptyCells.length > 0) {
-    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-    randomCell.click();
+    let bestMove = findBestMove();
+    cellElements[bestMove].click();
+  }
+}
+
+function findBestMove() {
+  let bestScore = -Infinity;
+  let bestMove = 0;
+
+  for (let i = 0; i < cellElements.length; i++) {
+    if (!cellElements[i].classList.contains(X_CLASS) && !cellElements[i].classList.contains(O_CLASS)) {
+      cellElements[i].classList.add(O_CLASS);
+      let score = minimax(0, false);
+      cellElements[i].classList.remove(O_CLASS);
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = i;
+      }
+    }
+  }
+
+  return bestMove;
+}
+
+function minimax(depth, isMaximizing) {
+  if (checkWin(O_CLASS)) return 1;
+  if (checkWin(X_CLASS)) return -1;
+  if (isDraw()) return 0;
+
+  if (isMaximizing) {
+    let bestScore = -Infinity;
+    for (let i = 0; i < cellElements.length; i++) {
+      if (!cellElements[i].classList.contains(X_CLASS) && !cellElements[i].classList.contains(O_CLASS)) {
+        cellElements[i].classList.add(O_CLASS);
+        let score = minimax(depth + 1, false);
+        cellElements[i].classList.remove(O_CLASS);
+        bestScore = Math.max(score, bestScore);
+      }
+    }
+    return bestScore;
+  } else {
+    let bestScore = Infinity;
+    for (let i = 0; i < cellElements.length; i++) {
+      if (!cellElements[i].classList.contains(X_CLASS) && !cellElements[i].classList.contains(O_CLASS)) {
+        cellElements[i].classList.add(X_CLASS);
+        let score = minimax(depth + 1, true);
+        cellElements[i].classList.remove(X_CLASS);
+        bestScore = Math.min(score, bestScore);
+      }
+    }
+    return bestScore;
   }
 }
 
