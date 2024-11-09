@@ -1,31 +1,32 @@
 <html><head><base href="." /><title>Jogo da Velha</title><style>
 :root {
-  --primary-color: #2196F3;
-  --secondary-color: #FF4081;
-  --background-color: #f0f2f5;
-  --text-color: #333;
-  --cell-bg: #ffffff;
-  --cell-hover: #e0e0e0;
+  --primary-color: #ff6b6b;
+  --border-color: #ff6b6b;
+  --background-color: linear-gradient(135deg, #1a1a2e, #16213e);
+  --text-color: #ffffff;
+  --cell-bg: #0f3460;
+  --cell-hover: #1a4c7c;
 }
 
-[data-theme="dark"] {
-  --primary-color: #64B5F6;
-  --secondary-color: #FF80AB;
-  --background-color: #1a1a1a;
-  --text-color: #ffffff;
-  --cell-bg: #2d2d2d;
-  --cell-hover: #3d3d3d;
+[data-theme="green"] {
+  --primary-color: #2ecc71;
+  --border-color: #2ecc71;
+}
+
+[data-theme="yellow"] {
+  --primary-color: #f1c40f;
+  --border-color: #f1c40f;
 }
 
 body {
   font-family: 'Roboto', sans-serif;
-  background-color: var(--background-color);
+  background: var(--background-color);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   color: var(--text-color);
   transition: all 0.3s ease;
 }
@@ -33,24 +34,24 @@ body {
 h1 {
   color: var(--text-color);
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 2.5em;
+  margin-bottom: 10px;
+  font-size: 2em;
+  margin-top: 10px;
 }
 
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  background: var(--cell-bg);
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--border-color);
 }
 
 .cell {
   width: 100px;
   height: 100px;
-  background: var(--background-color);
+  background: var(--cell-bg);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -59,6 +60,7 @@ h1 {
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: bold;
+  color: var(--text-color);
 }
 
 .cell:hover {
@@ -66,33 +68,41 @@ h1 {
 }
 
 .status {
-  margin: 20px 0;
-  font-size: 1.5em;
+  margin: 10px 0;
+  font-size: 1.2em;
   color: var(--text-color);
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-direction: row;
 }
 
 .restart, .theme-toggle {
   background: var(--primary-color);
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: 25px;
   font-size: 1.1em;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 10px;
+  font-weight: bold;
 }
 
 .restart:hover, .theme-toggle:hover {
   transform: scale(1.05);
+  opacity: 0.9;
 }
 
 .x {
-  color: var(--primary-color);
+  color: #ff6b6b;
 }
 
 .o {
-  color: var(--secondary-color);
+  color: #4ecdc4;
 }
 
 @keyframes winner {
@@ -103,47 +113,11 @@ h1 {
 
 .winner {
   animation: winner 0.5s ease-in-out;
-  background: #e3f2fd !important;
-}
-
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.game-mode {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.mode-button {
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 1.1em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.mode-button:hover {
-  transform: scale(1.05);
-}
-
-.mode-button.selected {
-  background: var(--secondary-color);
-}
-
-.board.hidden {
-  display: none;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .footer {
-  margin-top: 40px;
+  margin-top: 30px;
   text-align: center;
   color: var(--text-color);
 }
@@ -151,20 +125,18 @@ h1 {
 .footer a {
   color: var(--primary-color);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  display: block;
+  margin-top: 5px;
 }
 
 .footer a:hover {
-  color: var(--secondary-color);
+  opacity: 0.8;
 }
 </style></head><body>
 <h1>Jogo da Velha</h1>
-<div class="game-mode">
-  <button class="mode-button" id="friendMode">Jogar com Amigo</button>
-  <button class="mode-button" id="aiMode">Jogar contra IA</button>
-</div>
-<div class="status" id="status">Selecione um modo de jogo</div>
-<div class="board hidden" id="board">
+<div class="status" id="status">Vez do Jogador X</div>
+<div class="board" id="board">
   <div class="cell" data-cell></div>
   <div class="cell" data-cell></div>
   <div class="cell" data-cell></div>
@@ -177,25 +149,20 @@ h1 {
 </div>
 <div class="controls">
   <button class="restart" id="restartButton">Recomeçar Jogo</button>
-  <button class="theme-toggle" id="themeToggle">Alternar Tema</button>
+  <button class="theme-toggle" id="themeToggle">Mudar Tema</button>
 </div>
 <div class="footer">
-  <p>Jogo criado por Pedro Enrique</p>
-  <p><a href="https://jogosdeinclusao.github.io/">Acesse Jogos de Inclusão</a></p>
+  <p>Jogo Criado por Pedro Enrique</p>
+  <a href="https://jogosdeinclusao.github.io/">Acesse Jogos de Inclusão</a>
 </div>
 
 <script>
 const X_CLASS = 'x';
 const O_CLASS = 'o';
 const WINNING_COMBINATIONS = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6]
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6]
 ];
 
 const cellElements = document.querySelectorAll('[data-cell]');
@@ -204,105 +171,58 @@ const statusText = document.getElementById('status');
 const restartButton = document.getElementById('restartButton');
 const themeToggle = document.getElementById('themeToggle');
 let xTurn = true;
-let gameMode = null;
-const friendModeBtn = document.getElementById('friendMode');
-const aiModeBtn = document.getElementById('aiMode');
 
-friendModeBtn.addEventListener('click', () => startGameMode('friend'));
-aiModeBtn.addEventListener('click', () => startGameMode('ai'));
+// Load saved theme
+function loadSavedTheme() {
+  const savedTheme = localStorage.getItem('gameTheme') || 'red';
+  setTheme(savedTheme);
+}
 
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
+  localStorage.setItem('gameTheme', theme);
 }
 
-function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  setTheme(newTheme);
-}
-
-// Load saved theme
-const savedTheme = localStorage.getItem('theme') || 'light';
-setTheme(savedTheme);
-
-themeToggle.addEventListener('click', toggleTheme);
-
-function startGameMode(mode) {
-  gameMode = mode;
-  board.classList.remove('hidden');
-  friendModeBtn.classList.toggle('selected', mode === 'friend');
-  aiModeBtn.classList.toggle('selected', mode === 'ai');
-  startGame();
-}
+themeToggle.addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'red';
+  const themes = ['red', 'green', 'yellow'];
+  const currentIndex = themes.indexOf(currentTheme);
+  const nextTheme = themes[(currentIndex + 1) % themes.length];
+  setTheme(nextTheme);
+});
 
 restartButton.addEventListener('click', startGame);
 
-function startGame() {
-  xTurn = true;
-  cellElements.forEach(cell => {
-    cell.classList.remove(X_CLASS);
-    cell.classList.remove(O_CLASS);
-    cell.classList.remove('winner');
-    cell.removeEventListener('click', handleClick);
-    cell.addEventListener('click', handleClick, { once: true });
-    cell.textContent = '';
-  });
-  setStatusMessage();
-}
-
-function handleClick(e) {
-  const cell = e.target;
-  if (cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS)) return;
-
-  placeMark(cell, xTurn ? X_CLASS : O_CLASS);
-
-  if (checkWin(xTurn ? X_CLASS : O_CLASS)) {
-    endGame(false);
-  } else if (isDraw()) {
-    endGame(true);
-  } else {
-    swapTurns();
-    setStatusMessage();
-
-    if (gameMode === 'ai' && !xTurn) {
-      setTimeout(makeAiMove, 500);
+function getBestMove() {
+  if (Math.random() < 0.3) {
+    let emptyCells = [...cellElements].filter(cell => 
+      !cell.classList.contains(X_CLASS) && !cell.classList.contains(O_CLASS)
+    );
+    if (emptyCells.length > 0) {
+      let randomIndex = Math.floor(Math.random() * emptyCells.length);
+      return [...cellElements].indexOf(emptyCells[randomIndex]);
     }
   }
-}
 
-function makeAiMove() {
-  const emptyCells = [...cellElements].filter(cell => 
-    !cell.classList.contains(X_CLASS) && !cell.classList.contains(O_CLASS)
-  );
-
-  if (emptyCells.length > 0) {
-    let bestMove = findBestMove();
-    cellElements[bestMove].click();
-  }
-}
-
-function findBestMove() {
   let bestScore = -Infinity;
-  let bestMove = 0;
-
+  let bestMove;
+  
   for (let i = 0; i < cellElements.length; i++) {
-    if (!cellElements[i].classList.contains(X_CLASS) && !cellElements[i].classList.contains(O_CLASS)) {
+    if (!cellElements[i].classList.contains(X_CLASS) && 
+        !cellElements[i].classList.contains(O_CLASS)) {
       cellElements[i].classList.add(O_CLASS);
-      let score = minimax(0, false);
+      let score = minimax(cellElements, 0, false);
       cellElements[i].classList.remove(O_CLASS);
-      
       if (score > bestScore) {
         bestScore = score;
         bestMove = i;
       }
     }
   }
-
   return bestMove;
 }
 
-function minimax(depth, isMaximizing) {
+function minimax(board, depth, isMaximizing) {
   if (checkWin(O_CLASS)) return 1;
   if (checkWin(X_CLASS)) return -1;
   if (isDraw()) return 0;
@@ -310,9 +230,10 @@ function minimax(depth, isMaximizing) {
   if (isMaximizing) {
     let bestScore = -Infinity;
     for (let i = 0; i < cellElements.length; i++) {
-      if (!cellElements[i].classList.contains(X_CLASS) && !cellElements[i].classList.contains(O_CLASS)) {
+      if (!cellElements[i].classList.contains(X_CLASS) && 
+          !cellElements[i].classList.contains(O_CLASS)) {
         cellElements[i].classList.add(O_CLASS);
-        let score = minimax(depth + 1, false);
+        let score = minimax(board, depth + 1, false);
         cellElements[i].classList.remove(O_CLASS);
         bestScore = Math.max(score, bestScore);
       }
@@ -321,14 +242,51 @@ function minimax(depth, isMaximizing) {
   } else {
     let bestScore = Infinity;
     for (let i = 0; i < cellElements.length; i++) {
-      if (!cellElements[i].classList.contains(X_CLASS) && !cellElements[i].classList.contains(O_CLASS)) {
+      if (!cellElements[i].classList.contains(X_CLASS) && 
+          !cellElements[i].classList.contains(O_CLASS)) {
         cellElements[i].classList.add(X_CLASS);
-        let score = minimax(depth + 1, true);
+        let score = minimax(board, depth + 1, true);
         cellElements[i].classList.remove(X_CLASS);
         bestScore = Math.min(score, bestScore);
       }
     }
     return bestScore;
+  }
+}
+
+function makeAIMove() {
+  if (!xTurn) {
+    const bestMove = getBestMove();
+    if (bestMove !== undefined) {
+      const cell = cellElements[bestMove];
+      placeMark(cell, O_CLASS);
+      if (checkWin(O_CLASS)) {
+        endGame(false);
+      } else if (isDraw()) {
+        endGame(true);
+      } else {
+        swapTurns();
+        setStatusMessage();
+      }
+    }
+  }
+}
+
+function handleClick(e) {
+  const cell = e.target;
+  if (cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS)) return;
+  if (!xTurn) return;
+
+  placeMark(cell, X_CLASS);
+
+  if (checkWin(X_CLASS)) {
+    endGame(false);
+  } else if (isDraw()) {
+    endGame(true);
+  } else {
+    swapTurns();
+    setStatusMessage();
+    setTimeout(makeAIMove, 500);
   }
 }
 
@@ -342,11 +300,7 @@ function swapTurns() {
 }
 
 function setStatusMessage() {
-  if (!gameMode) {
-    statusText.textContent = 'Selecione um modo de jogo';
-  } else {
-    statusText.textContent = xTurn ? 'Vez do Jogador X' : (gameMode === 'ai' ? 'Vez da IA' : 'Vez do Jogador O');
-  }
+  statusText.textContent = xTurn ? 'Vez do Jogador X' : 'Vez do Jogador O';
 }
 
 function checkWin(currentClass) {
@@ -373,11 +327,28 @@ function endGame(draw) {
   if (draw) {
     statusText.textContent = 'Empate!';
   } else {
-    statusText.textContent = `${xTurn ? 'X' : (gameMode === 'ai' ? 'IA' : 'O')} Venceu!`;
+    statusText.textContent = `${xTurn ? 'X' : 'O'} Venceu!`;
   }
   cellElements.forEach(cell => {
     cell.removeEventListener('click', handleClick);
   });
 }
+
+function startGame() {
+  xTurn = true;
+  cellElements.forEach(cell => {
+    cell.classList.remove(X_CLASS);
+    cell.classList.remove(O_CLASS);
+    cell.classList.remove('winner');
+    cell.removeEventListener('click', handleClick);
+    cell.addEventListener('click', handleClick, { once: true });
+    cell.textContent = '';
+  });
+  setStatusMessage();
+}
+
+// Load saved theme and start game
+loadSavedTheme();
+startGame();
 </script>
 </body></html>
